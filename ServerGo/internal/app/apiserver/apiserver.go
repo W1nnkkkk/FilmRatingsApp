@@ -2,6 +2,7 @@ package apiserver
 
 import (
 	"encoding/json"
+	"fmt"
 	"io"
 	"net/http"
 	"regexp"
@@ -28,7 +29,7 @@ func Start(config config.Config) error {
 	}
 
 	server := newServer(store)
-	return http.ListenAndServe("localhost:7172", &server)
+	return http.ListenAndServe(config.Server.Host+fmt.Sprint(config.Server.Port), &server)
 }
 
 func newServer(store store.Store) Server {
