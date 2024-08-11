@@ -6,10 +6,12 @@ import (
 	"io"
 	"net/http"
 	"regexp"
+	"strconv"
 	"strings"
 
 	"github.com/W1nnkkkk/FilmRatingsApp.git/config"
 	"github.com/W1nnkkkk/FilmRatingsApp.git/internal/app/store"
+	backReader "github.com/W1nnkkkk/FileBackReader"
 	"github.com/gorilla/mux"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -51,6 +53,7 @@ func (s *Server) configureRouter() {
 	s.router.HandleFunc("/movie/find", s.handleMovieFind()).Methods("GET")
 	s.router.HandleFunc("/movie/review/find", s.handleReviewFind()).Methods("GET")
 	s.router.HandleFunc("/movie/review/create", s.handleReviewCreate()).Methods("POST")
+	s.router.HandleFunc("/logs", s.handleGetLogs()).Methods("GET")
 }
 
 func (s *Server) handleMovieFind() http.HandlerFunc {
@@ -160,6 +163,25 @@ func (s *Server) handleReviewFind() http.HandlerFunc {
 		}
 
 		s.respond(w, r, http.StatusOK, review)
+	}
+}
+
+func (s *Server) handleGetLogs() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		countRows, err := strconv.Atoi(r.URL.Query().Get("count"))
+		if err != nil {
+			s.store.Logger.LogErrToFile(err)
+			s.error(w, r, http.StatusBadGateway, err)
+		}
+
+		logs, err := backReader.ReadFromEndFile(s.store.Logger.LogPath, countRows)
+
+		if err != nil {
+			s.store.Logger.LogErrToFile(err)
+			s.error(w, r, http.StatusBadGateway, err)
+		}
+
+		s.respond(w, r, http.StatusOK, logs)
 	}
 }
 

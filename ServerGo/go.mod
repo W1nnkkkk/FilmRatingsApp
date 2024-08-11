@@ -1,9 +1,10 @@
 module github.com/W1nnkkkk/FilmRatingsApp.git
 
-go 1.21.10
+go 1.22.5
 
 require (
 	github.com/BurntSushi/toml v1.4.0 // indirect
+	github.com/W1nnkkkk/FileBackReader v0.0.0-20240811125102-f426e5852329 // indirect
 	github.com/golang/snappy v0.0.1 // indirect
 	github.com/gorilla/mux v1.8.1 // indirect
 	github.com/klauspost/compress v1.13.6 // indirect
