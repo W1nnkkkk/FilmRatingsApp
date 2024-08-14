@@ -1,7 +1,7 @@
 github.com/BurntSushi/toml v1.4.0 h1:kuoIxZQy2WRRk1pttg9asf+WVv6tWQuBNVmK8+nqPr0=
 github.com/BurntSushi/toml v1.4.0/go.mod h1:ukJfTF/6rtPPRCnwkur4qwRxa8vTRFBF0uk2lLoLwho=
-github.com/W1nnkkkk/FileBackReader v0.0.0-20240811125102-f426e5852329 h1:iuQpYe4txEskNz5Y0wvKoYeD7umuIEqmvEYl/ZbYjaI=
-github.com/W1nnkkkk/FileBackReader v0.0.0-20240811125102-f426e5852329/go.mod h1:up31nZRvPT7XbxnDhKYa9Ltb2VBpHADIzRK24DpvvtA=
+github.com/W1nnkkkk/FileBackReader v0.0.0-20240814072343-750c63783522 h1:Fxc/oBht6P8kKsJ8SusEUye7C4aW0V2wKIaEnUHmUTE=
+github.com/W1nnkkkk/FileBackReader v0.0.0-20240814072343-750c63783522/go.mod h1:up31nZRvPT7XbxnDhKYa9Ltb2VBpHADIzRK24DpvvtA=
 github.com/golang/snappy v0.0.1 h1:Qgr9rKW7uDUkrbSmQeiDsGa8SjGyCOGtuasMWwvp2P4=
 github.com/golang/snappy v0.0.1/go.mod h1:/XxbfmMg8lxefKM7IXC3fBNl/7bRcc72aCRzEWrmP2Q=
 github.com/gorilla/mux v1.8.1 h1:TuBL49tXwgrFYWhqrNgrUNEY92u81SPhu7sTdzQEiWY=
