@@ -167,6 +167,13 @@ func (s *Server) handleReviewFind() http.HandlerFunc {
 }
 
 func (s *Server) handleGetLogs() http.HandlerFunc {
+	type Log struct {
+		Date string `json:"date"`
+		Time string `json:"time"`
+		Text string `json:"text"`
+	}
+
+
 	return func(w http.ResponseWriter, r *http.Request) {
 		countRows, err := strconv.Atoi(r.URL.Query().Get("count"))
 		if err != nil {
@@ -175,12 +182,26 @@ func (s *Server) handleGetLogs() http.HandlerFunc {
 			return
 		}
 
-		logs, err := backReader.ReadFromEndFile(s.store.Logger.LogPath, countRows)
+		logsStringArr, err := backReader.ReadFromEndFile(s.store.Logger.LogPath, countRows)
 
 		if err != nil {
 			s.store.Logger.LogErrToFile(err)
 			s.error(w, r, http.StatusBadGateway, err)
 			return
+		}
+
+		logs := []Log{}
+
+		for i := 0; i < len(logsStringArr); i++ {
+			data := strings.Split(logsStringArr[i], " ")
+			msg := ""
+			date := data[0]
+			time := data[1]
+			for j := 2; j < len(data); j++ {
+				msg += data[j] + " "
+			}
+
+			logs = append(logs, Log{ Date: date, Time: time, Text: msg})
 		}
 
 		s.respond(w, r, http.StatusOK, logs)
