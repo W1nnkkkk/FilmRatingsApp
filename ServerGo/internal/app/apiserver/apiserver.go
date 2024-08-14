@@ -172,6 +172,7 @@ func (s *Server) handleGetLogs() http.HandlerFunc {
 		if err != nil {
 			s.store.Logger.LogErrToFile(err)
 			s.error(w, r, http.StatusBadGateway, err)
+			return
 		}
 
 		logs, err := backReader.ReadFromEndFile(s.store.Logger.LogPath, countRows)
@@ -179,6 +180,7 @@ func (s *Server) handleGetLogs() http.HandlerFunc {
 		if err != nil {
 			s.store.Logger.LogErrToFile(err)
 			s.error(w, r, http.StatusBadGateway, err)
+			return
 		}
 
 		s.respond(w, r, http.StatusOK, logs)
