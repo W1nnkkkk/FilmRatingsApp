@@ -4,7 +4,7 @@ from pymongo import MongoClient
 class MongoEntity:
     def __init__(self):
         try:
-            self.conn = MongoClient("194.87.147.55", port=27017)
+            self.conn = MongoClient("45.141.101.5", port=27017)
             self.data_base = self.conn["moviebox"]
             self.collection = self.data_base["movies"]
         except Exception as err:

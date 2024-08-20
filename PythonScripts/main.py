@@ -101,8 +101,7 @@ def parse_table_data_and_insert_into_mongo(url):
         "starring": starrings
     }
 
-    print(document)
-    # mongo_descriptor.add_to_collection(document=document)
+    mongo_descriptor.add_to_collection(document=document)
 
 
 def upload_image(image_data, server_url, filename):
