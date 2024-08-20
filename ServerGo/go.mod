@@ -1,6 +1,6 @@
 module github.com/W1nnkkkk/FilmRatingsApp.git
 
-go 1.22.5
+go 1.23
 
 require (
 	github.com/BurntSushi/toml v1.4.0 // indirect
