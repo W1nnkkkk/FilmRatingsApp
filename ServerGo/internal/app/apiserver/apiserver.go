@@ -1,25 +1,29 @@
 package apiserver
 
 import (
+	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
+	"os"
 	"regexp"
 	"strconv"
 	"strings"
+	"time"
 
+	backReader "github.com/W1nnkkkk/FileBackReader"
 	"github.com/W1nnkkkk/FilmRatingsApp.git/config"
 	"github.com/W1nnkkkk/FilmRatingsApp.git/internal/app/store"
-	backReader "github.com/W1nnkkkk/FileBackReader"
 	"github.com/gorilla/mux"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 type Server struct {
-	router mux.Router
-	store  store.Store
+	router     mux.Router
+	store      store.Store
+	pathImages string
 }
 
 func Start(config config.Config) error {
@@ -30,14 +34,15 @@ func Start(config config.Config) error {
 		return err
 	}
 
-	server := newServer(store)
+	server := newServer(store, config)
 	return http.ListenAndServe(config.Server.Host+fmt.Sprint(config.Server.Port), &server)
 }
 
-func newServer(store store.Store) Server {
+func newServer(store store.Store, conf config.Config) Server {
 	s := Server{
 		router: *mux.NewRouter(),
 		store:  store,
+		pathImages: conf.Images.ImagePath,
 	}
 
 	s.configureRouter()
@@ -54,6 +59,8 @@ func (s *Server) configureRouter() {
 	s.router.HandleFunc("/movie/review/find", s.handleReviewFind()).Methods("GET")
 	s.router.HandleFunc("/movie/review/create", s.handleReviewCreate()).Methods("POST")
 	s.router.HandleFunc("/logs", s.handleGetLogs()).Methods("GET")
+	s.router.HandleFunc("/upload", s.handleCreateImage()).Methods("POST")
+	s.router.HandleFunc("/image/{filename}", s.handleGetImage()).Methods("GET")
 }
 
 func (s *Server) handleMovieFind() http.HandlerFunc {
@@ -173,7 +180,6 @@ func (s *Server) handleGetLogs() http.HandlerFunc {
 		Text string `json:"text"`
 	}
 
-
 	return func(w http.ResponseWriter, r *http.Request) {
 		countRows, err := strconv.Atoi(r.URL.Query().Get("count"))
 		if err != nil {
@@ -201,11 +207,92 @@ func (s *Server) handleGetLogs() http.HandlerFunc {
 				msg += data[j] + " "
 			}
 
-			logs = append(logs, Log{ Date: date, Time: time, Text: msg})
+			logs = append(logs, Log{Date: date, Time: time, Text: msg})
 		}
 
 		s.respond(w, r, http.StatusOK, logs)
 	}
+}
+
+func (s *Server) handleCreateImage() http.HandlerFunc {
+	type Data struct {
+		Image    []byte `json: "image"`
+		FileName string `json: "filename"`
+	}
+
+	return func(w http.ResponseWriter, r *http.Request) {
+		body, err := io.ReadAll(r.Body)
+		if err != nil {
+			s.store.Logger.LogErrToFile(err)
+			s.error(w, r, http.StatusBadRequest, err)
+			return
+		}
+
+		newFile := Data{}
+		var data map[string]interface{}
+		if err := json.Unmarshal(body, &data); err != nil {
+			http.Error(w, "Error parsing JSON data", http.StatusBadRequest)
+			return
+		}
+
+		newFile.FileName = data["filename"].(string)
+		newFile.Image, err = base64.StdEncoding.DecodeString(data["image"].(string))
+		if err != nil {
+			s.store.Logger.LogErrToFile(err)
+			s.error(w, r, http.StatusInternalServerError, err)
+			return
+		}
+
+		out, err := os.Create(s.pathImages + newFile.FileName + ".jpg")
+		if err != nil {
+			s.store.Logger.LogErrToFile(err)
+			s.error(w, r, http.StatusInternalServerError, err)
+			return
+		}
+
+		_, err = out.Write(newFile.Image)
+		if err != nil {
+			s.store.Logger.LogErrToFile(err)
+			s.error(w, r, http.StatusInternalServerError, err)
+			return
+		}
+
+		s.respond(w, r, http.StatusOK, "Картинка загружена")
+	}
+}
+
+func (s *Server) handleGetImage() http.HandlerFunc {
+    return func(w http.ResponseWriter, r *http.Request) {
+        vars := mux.Vars(r)
+        filename := vars["filename"]
+
+        filePath := s.pathImages + filename
+
+        // Проверка, существует ли файл
+        if _, err := os.Stat(filePath); os.IsNotExist(err) {
+            s.store.Logger.LogErrToFile(err)
+            s.error(w, r, http.StatusNotFound, err)
+            return
+        }
+
+        // Задание типа контента
+        contentType := "image/jpeg" // Или другой тип, в зависимости от файла
+
+        // Открыть файл на чтение
+        file, err := os.Open(filePath)
+        if err != nil {
+            s.store.Logger.LogErrToFile(err)
+            s.error(w, r, http.StatusInternalServerError, err)
+            return
+        }
+        defer file.Close() // Закрыть файл после использования
+
+        // Установить Content-Type
+        w.Header().Set("Content-Type", contentType)
+
+        // Отправка файла клиенту
+        http.ServeContent(w, r, filename, time.Now(), file)
+    }
 }
 
 func (s *Server) error(w http.ResponseWriter, r *http.Request, code int, err error) {

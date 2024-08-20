@@ -21,6 +21,9 @@ type Config struct {
 	Logger struct {
 		LogPath string `toml:"logPath"`
 	}
+	Images struct {
+		ImagePath string `toml:"imagePath"`
+	}
 }
 
 func ConfigInit() (Config, error) {
