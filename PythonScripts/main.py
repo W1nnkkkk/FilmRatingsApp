@@ -1,11 +1,9 @@
 # -- coding: utf-8 --
 import base64
-import time
-from concurrent.futures import ThreadPoolExecutor
+import json
 import requests
 from bs4 import BeautifulSoup
 import pandas as pd
-from fake_useragent import UserAgent
 from MongoConnClass import MongoEntity
 
 
@@ -13,8 +11,9 @@ main_url = "https://kino.mail.ru"
 extra_url = "/cinema/online"
 main_url_next_page = "?page="
 uri = []
+movies = []
 mongo_descriptor = MongoEntity()
-server = "http://127.0.0.1:7979"
+server = "http://45.141.101.5:7979"
 
 
 def main():
@@ -101,7 +100,13 @@ def parse_table_data_and_insert_into_mongo(url):
         "starring": starrings
     }
 
-    mongo_descriptor.add_to_collection(document=document)
+    # mongo_descriptor.add_to_collection(document=document)
+    global movies
+    movies.append(document)
+    json_object = json.dumps(movies, indent=4)
+
+    with open("movies.json", "w") as outfile:
+        outfile.write(str(movies))
 
 
 def upload_image(image_data, server_url, filename):
