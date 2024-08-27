@@ -13,7 +13,7 @@ main_url_next_page = "?page="
 uri = []
 movies = []
 mongo_descriptor = MongoEntity()
-server = "http://127.0.0.1:7979"
+server = "http://45.141.101.5:7979"
 
 
 def main():
@@ -89,7 +89,7 @@ def parse_table_data_and_insert_into_mongo(url):
         print(err)
 
     if (name.__contains__(" ")):
-        name.replace(" ", "")
+        name = name.replace(" ", "")
 
     document = {
         "image": server + "/image/" + name + ".jpg",
