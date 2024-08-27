@@ -231,11 +231,15 @@ func (s *Server) handleCreateImage() http.HandlerFunc {
 		newFile := Data{}
 		var data map[string]interface{}
 		if err := json.Unmarshal(body, &data); err != nil {
-			http.Error(w, "Error parsing JSON data", http.StatusBadRequest)
+			s.store.Logger.LogErrToFile(err)
+			s.error(w, r, http.StatusBadRequest, err)
 			return
 		}
 
 		newFile.FileName = data["filename"].(string)
+		if(strings.Contains(newFile.FileName, " ")) {
+			fmt.Println(strings.Replace(newFile.FileName, " ", "", len(newFile.FileName)))
+		}
 		newFile.Image, err = base64.StdEncoding.DecodeString(data["image"].(string))
 		if err != nil {
 			s.store.Logger.LogErrToFile(err)
