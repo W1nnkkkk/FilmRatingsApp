@@ -270,13 +270,7 @@ func (s *Server) handleGetImage() http.HandlerFunc {
 
         contentType := "image/jpeg"
 
-        file, err := os.Open(filePath)
-        if err != nil {
-            s.store.Logger.LogErrToFile(err)
-            s.error(w, r, http.StatusInternalServerError, err)
-            return
-        }
-        defer file.Close()
+        file, _ := os.Open(filePath)
 
         w.Header().Set("Content-Type", contentType)
 
