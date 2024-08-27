@@ -268,12 +268,6 @@ func (s *Server) handleGetImage() http.HandlerFunc {
 
         filePath := s.pathImages + filename
 
-        if _, err := os.Stat(filePath); os.IsNotExist(err) {
-            s.store.Logger.LogErrToFile(err)
-            s.error(w, r, http.StatusNotFound, err)
-            return
-        }
-
         contentType := "image/jpeg"
 
         file, err := os.Open(filePath)
