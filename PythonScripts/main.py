@@ -88,9 +88,6 @@ def parse_table_data_and_insert_into_mongo(url):
     except Exception as err:
         print(err)
 
-    if (name.__contains__(" ")):
-        name = name.replace(" ", "")
-
     document = {
         "image": server + "/image/" + name + ".jpg",
         "name": name,

@@ -237,9 +237,6 @@ func (s *Server) handleCreateImage() http.HandlerFunc {
 		}
 
 		newFile.FileName = data["filename"].(string)
-		if(strings.Contains(newFile.FileName, " ")) {
-			newFile.FileName = strings.Replace(newFile.FileName, " ", "", len(newFile.FileName))
-		}
 		newFile.Image, err = base64.StdEncoding.DecodeString(data["image"].(string))
 		if err != nil {
 			s.store.Logger.LogErrToFile(err)
