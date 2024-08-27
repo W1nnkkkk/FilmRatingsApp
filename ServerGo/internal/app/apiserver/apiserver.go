@@ -268,16 +268,23 @@ func (s *Server) handleGetImage() http.HandlerFunc {
 
         filePath := s.pathImages + filename
 
-        contentType := "image/jpeg"
+        w.Header().Set("Access-Control-Allow-Origin", "*")
 
-        file, _ := os.Open(filePath)
+        file, err := os.Open(filePath)
+        if err != nil {
+            s.store.Logger.LogErrToFile(fmt.Errorf("Ошибка в открытии файла"))
+			s.error(w, r, http.StatusInternalServerError, err)
+            return
+        }
+        defer file.Close()
 
+        contentType := "image/jpeg" 
         w.Header().Set("Content-Type", contentType)
-
 
         http.ServeContent(w, r, filename, time.Now(), file)
     }
 }
+
 
 func (s *Server) error(w http.ResponseWriter, r *http.Request, code int, err error) {
 	s.respond(w, r, code, map[string]string{"error": err.Error()})
