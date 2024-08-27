@@ -268,29 +268,25 @@ func (s *Server) handleGetImage() http.HandlerFunc {
 
         filePath := s.pathImages + filename
 
-        // Проверка, существует ли файл
         if _, err := os.Stat(filePath); os.IsNotExist(err) {
             s.store.Logger.LogErrToFile(err)
             s.error(w, r, http.StatusNotFound, err)
             return
         }
 
-        // Задание типа контента
-        contentType := "image/jpeg" // Или другой тип, в зависимости от файла
+        contentType := "image/jpeg"
 
-        // Открыть файл на чтение
         file, err := os.Open(filePath)
         if err != nil {
             s.store.Logger.LogErrToFile(err)
             s.error(w, r, http.StatusInternalServerError, err)
             return
         }
-        defer file.Close() // Закрыть файл после использования
+        defer file.Close()
 
-        // Установить Content-Type
         w.Header().Set("Content-Type", contentType)
 
-        // Отправка файла клиенту
+
         http.ServeContent(w, r, filename, time.Now(), file)
     }
 }
