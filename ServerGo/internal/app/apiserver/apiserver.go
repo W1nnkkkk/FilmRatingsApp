@@ -47,6 +47,22 @@ func newServer(store store.Store, conf config.Config) Server {
 
 	s.configureRouter()
 
+	go func() {
+        ticker := time.NewTicker(24 * time.Hour)
+        defer ticker.Stop()
+
+        for {
+            select {
+            case <-ticker.C:
+                if err := clearLogFile(s.store.Logger.LogPath); err != nil {
+                    fmt.Println("Ошибка при очистке логов:", err)
+                } else {
+                    fmt.Println("Файл логов был очищен.")
+                }
+            }
+        }
+    }()
+
 	return s
 }
 
@@ -296,4 +312,15 @@ func (s *Server) respond(w http.ResponseWriter, r *http.Request, code int, data 
 	if data != nil {
 		json.NewEncoder(w).Encode(data)
 	}
+}
+
+func clearLogFile(filePath string) error {
+    // Открываем файл в режиме записи, чтобы очистить его содержимое
+    file, err := os.OpenFile(filePath, os.O_RDWR|os.O_TRUNC|os.O_CREATE, 0644)
+    if err != nil {
+        return err
+    }
+    defer file.Close()
+
+    return nil
 }
